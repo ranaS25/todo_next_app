@@ -15,9 +15,7 @@ const addTodo = async (req, res) => {
   }
 };
 
-const updateTodo = async (req, res) => {
-  res.send("updated Todo item");
-};
+
 
 const listTodos = async (req, res) => {
   try {
@@ -44,7 +42,51 @@ const listTodos = async (req, res) => {
   }
 };
 
-const deleteTodo = (req, res) => {
-  res.send("deleted Todo item");
+const updateTodo = async (req, res) => {
+  
+  const {id,  title, description } = req.body;
+
+  try {
+    const todo = await Todo.findById(id);
+
+    if (!todo) {
+      return res.status(404).json({ message: 'To-Do not found' });
+    }
+
+    // Update the fields with new data
+    todo.title = title || todo.title;
+    todo.description = description || todo.description;
+    todo.updatedAt = Date.now(); // Update the timestamp
+
+    const updatedTodo = await todo.save(); // Save the updated document
+
+    res.json(updatedTodo);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
+
+
+const deleteTodo = async (req, res) => {
+  // console.log(req.body);
+  const { id } = req.body;
+
+  try {
+    const todo = await Todo.findById(id);
+    // console.log(todo);
+
+    if (!todo) {
+      return res.status(404).json({ message: "To-Do not found" });
+    }
+
+    await Todo.deleteOne({ _id: id }) // Delete the document
+
+    res.json({ message: "To-Do deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 export { addTodo, updateTodo, listTodos, deleteTodo };
